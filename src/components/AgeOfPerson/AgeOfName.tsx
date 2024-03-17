@@ -3,6 +3,10 @@ import * as Yup from "yup";
 import { ErrorMessage, Field, FieldProps, Form, Formik } from "formik";
 import { Button, FormItem, FormLayoutGroup } from "@vkontakte/vkui";
 import { useGetPersonByNameQuery } from "../../app/services/persons";
+import cn from "classnames";
+import styles from "./AgeOfPerson.module.css";
+import { useSelector } from "react-redux";
+import { RootState } from "../../app/store";
 
 function AgeOfPerson() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -11,43 +15,54 @@ function AgeOfPerson() {
     inputRef.current?.value || "",
     { skip }
   );
+  const { errorDuplicateNames, errorResponse } = useSelector(
+    (s: RootState) => s.persons
+  );
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .matches(/^[A-ZА-Я]+$/i, "Поле должно содержать только буквы!")
+      .matches(/^[A-ZА-Я]+$/i, "Поле должно содержать только буквы")
       .required("Имя обязательно"),
   });
   return (
     <>
       <Formik
         initialValues={{ name: "" }}
-        onSubmit={(values, { setSubmitting }) => {
+        onSubmit={(_, { setSubmitting }) => {
           setSkip(false);
           refetch();
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, isValid }) => (
           <Form>
-            <FormLayoutGroup>
-              <FormItem
-                top="Введите имя"
-                status={(isSubmitting && "valid") || undefined}
-              >
+            <FormLayoutGroup mode="horizontal" className={styles.form}>
+              <FormItem status={(isSubmitting && "valid") || undefined}>
                 <Field name="name">
                   {({ field }: FieldProps) => (
-                    <div>
-                      <input type="text" {...field} ref={inputRef} />
-                      <ErrorMessage name="name" component="div" />
-                    </div>
+                    <input
+                      className={cn(styles.input, {
+                        [styles.noValid]: !isValid,
+                      })}
+                      type="text"
+                      {...field}
+                      ref={inputRef}
+                      placeholder="Введите имя"
+                    />
                   )}
                 </Field>
               </FormItem>
               <Button size="l" type="submit" disabled={isLoading}>
-                Отправить
+                {isLoading ? "Загрузка..." : "Узнать возраст"}
               </Button>
             </FormLayoutGroup>
+            <ErrorMessage name="name" />
+            {data && <p>Возраст: {data.age}</p>}
+            {errorDuplicateNames && (
+              <p className={styles.error}>{errorDuplicateNames}</p>
+            )}
+            {errorResponse && <p className={styles.error}>{errorResponse}</p>}
           </Form>
         )}
       </Formik>

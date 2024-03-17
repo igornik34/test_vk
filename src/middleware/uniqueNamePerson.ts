@@ -1,27 +1,44 @@
-import { Middleware } from '@reduxjs/toolkit';
-import { RootState } from '../app/store';
+import { Middleware } from "@reduxjs/toolkit";
+import { IPerson } from "../interfaces/person";
+import { RootState } from "../app/store";
+import { QueryStatus } from "@reduxjs/toolkit/query";
+import { personsActions } from "../features/persons/persons.slice";
 
-const requestCache: Set<string> = new Set();
+export interface CustomAction<I> {
+  type: string;
+  payload: I;
+  meta?: {
+    requestStatus: QueryStatus;
+    requestId: string;
+  };
+}
 
-const uniqueNameMiddleware: Middleware<{}, RootState> = (store) => (next) => async (action) => {
-  if (action.type.startsWith('api/')) {
-    const { endpointName, requestId } = action.meta;
-    if (endpointName === 'fetchAverageAge' && requestId) {
-      const { arg: name } = action.payload;
-      if (requestCache.has(name)) {
-        throw new Error(`Запрос с именем ${name} уже был выполнен.`);
-      } else {
-        requestCache.add(name);
-        try {
-          const result = await next(action);
-          return result;
-        } finally {
-          requestCache.delete(name);
+const uniqueNamePerson: Middleware<{}, RootState> =
+  (store) => (next) => (action) => {
+    const typedAction = action as CustomAction<IPerson>;
+    console.log(typedAction);
+
+    if (typedAction.type.includes("splitApiAgeOfPerson/executeQuery/")) {
+      const state = store.getState();
+      const person = typedAction.payload;
+      if (person) {
+        const existingPerson = state.persons.persons.find(
+          (p) => p.name === person.name
+        );
+        if (existingPerson) {
+          store.dispatch(
+            personsActions.setErrorDuplicateNames(
+              `Человек с именем ${person.name} уже запрашивался. Вот его возраст: ${person.age}`
+            )
+          );
+          return;
+        }
+        if (state.persons.errorDuplicateNames) {
+          personsActions.clearErrorDuplicateNames();
         }
       }
     }
-  }
-  return next(action);
-};
+    return next(action);
+  };
 
-export default uniqueNameMiddleware;
+export default uniqueNamePerson;

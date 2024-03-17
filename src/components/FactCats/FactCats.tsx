@@ -8,7 +8,7 @@ import { useGetFactQuery } from "../../app/services/factCats";
 function FactCats() {
   const factInputRef = useRef<HTMLTextAreaElement>(null);
   const [skip, setSkip] = useState(true);
-  const { data, isLoading, error, refetch } = useGetFactQuery(undefined, {
+  const { data, isLoading, refetch } = useGetFactQuery(undefined, {
     skip: skip,
   });
 
@@ -24,8 +24,8 @@ function FactCats() {
       <Formik
         initialValues={{}}
         onSubmit={() => {
-          setSkip(false); // После отправки формы изменяем skip на false
-          refetch(); // Выполняем запрос
+          setSkip(false);
+          refetch();
         }}
       >
         <Form className={styles.form}>
@@ -33,18 +33,14 @@ function FactCats() {
             getRef={factInputRef}
             placeholder="Узнай факты о котиках..."
           />
-          <Button
-            size="l"
-            type="submit"
-            disabled={isLoading}
-            loading={isLoading}
-          >
-            {!isLoading ? "Узнать факт" : ""}
+          <Button size="l" type="submit" disabled={isLoading}>
+            {isLoading ? "Загрузка..." : "Узнать факт"}
           </Button>
         </Form>
       </Formik>
     </Div>
   );
 }
+
 
 export default FactCats;

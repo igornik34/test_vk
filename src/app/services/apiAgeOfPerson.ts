@@ -7,6 +7,7 @@ const queryAgeOfPersonUrl = fetchBaseQuery({
 export const apiAgeOfPerson = createApi({
   reducerPath: "splitApiAgeOfPerson",
   baseQuery: queryAgeOfPersonUrl,
+  tagTypes: ["Person"],
   refetchOnMountOrArgChange: true,
   endpoints: () => ({}),
 });
