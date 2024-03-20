@@ -1,6 +1,6 @@
 import { Group, Panel, PanelHeader, Title } from "@vkontakte/vkui";
 import FactCats from "./components/FactCats/FactCats";
-import AgeOfName from "./components/AgeOfPerson/AgeOfName";
+import AgeOfName from "./components/AgeOfPerson/AgeOfPerson";
 import styles from "./App.module.css";
 
 const App: React.FC = () => {
