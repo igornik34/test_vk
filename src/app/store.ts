@@ -7,7 +7,6 @@ import {
 import { apiFactCats } from "./services/apiFactCats";
 import { apiAgeOfPerson } from "./services/apiAgeOfPerson";
 import persons from "../features/persons/persons.slice";
-import uniqueNamePerson from "../middleware/uniqueNamePerson";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
 const rootReducer = combineReducers({
@@ -20,12 +19,11 @@ const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
-      .concat(uniqueNamePerson)
       .concat(apiFactCats.middleware)
       .concat(apiAgeOfPerson.middleware),
 });
 
-setupListeners(store.dispatch)
+setupListeners(store.dispatch);
 
 export default store;
 
